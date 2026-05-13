@@ -4,13 +4,17 @@ import style from "./styles/tagExplorer.scss"
 // @ts-ignore
 import script from "./scripts/tagExplorer.inline"
 import { classNames } from "../util/lang"
-import { i18n } from "../i18n"
 
 export interface Options {
   title?: string
+  folderDefaultState: "collapsed" | "open"
+  useSavedState: boolean
 }
 
-const defaultOptions: Options = {}
+const defaultOptions: Options = {
+  folderDefaultState: "collapsed",
+  useSavedState: true,
+}
 
 let numTagExplorers = 0
 export default ((userOpts?: Partial<Options>) => {
@@ -20,7 +24,7 @@ export default ((userOpts?: Partial<Options>) => {
     const id = `tag-explorer-${numTagExplorers++}`
 
     return (
-      <div class={classNames(displayClass, "tag-explorer")}>
+      <div class={classNames(displayClass, "tag-explorer")} data-collapsed={opts.folderDefaultState}>
         <button
           type="button"
           class="tag-explorer-toggle mobile-explorer hide-until-loaded"
@@ -38,8 +42,9 @@ export default ((userOpts?: Partial<Options>) => {
             stroke-linecap="round"
             stroke-linejoin="round"
           >
-            <path d="M12 2H2v10l9.29 9.29c.94.94 2.48.94 3.42 0l6.58-6.58c.94-.94.94-2.48 0-3.42L12 2Z"/>
-            <path d="M7 7h.01"/>
+            <line x1="4" x2="20" y1="12" y2="12" />
+            <line x1="4" x2="20" y1="6" y2="6" />
+            <line x1="4" x2="20" y1="18" y2="18" />
           </svg>
         </button>
         <button
@@ -65,8 +70,39 @@ export default ((userOpts?: Partial<Options>) => {
           </svg>
         </button>
         <div id={id} class="tag-explorer-content" aria-expanded={false} role="group">
-          <ul class="tag-ul"></ul>
+          <ul class="tag-ul overflow"></ul>
         </div>
+        <template id="template-tag-article">
+          <li>
+            <a href="#"></a>
+          </li>
+        </template>
+        <template id="template-tag-folder">
+          <li>
+            <div class="tag-folder-container">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="12"
+                height="12"
+                viewBox="5 8 14 8"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                class="tag-folder-icon"
+              >
+                <polyline points="6 9 12 15 18 9"></polyline>
+              </svg>
+              <div>
+                <span class="tag-folder-title"></span>
+              </div>
+            </div>
+            <div class="tag-folder-outer">
+              <ul class="tag-folder-content"></ul>
+            </div>
+          </li>
+        </template>
       </div>
     )
   }
