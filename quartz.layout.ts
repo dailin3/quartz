@@ -64,4 +64,5 @@ export const defaultListPageLayout: PageLayout = {
     }),
     Component.TagExplorer(),
   ],
+  right: [],
 }
