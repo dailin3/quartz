@@ -38,6 +38,7 @@ export const defaultContentPageLayout: PageLayout = {
         { Component: Component.ReaderMode() },
       ],
     }),
+    Component.TagExplorer(),
   ],
   right: [
     Component.Graph(),
@@ -61,6 +62,6 @@ export const defaultListPageLayout: PageLayout = {
         { Component: Component.Darkmode() },
       ],
     }),
+    Component.TagExplorer(),
   ],
-  right: [],
 }

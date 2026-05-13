@@ -1,0 +1,204 @@
+@use "../../styles/variables.scss" as *;
+
+@media all and ($mobile) {
+  .page > #quartz-body {
+    & > :not(.sidebar.left:has(.tag-explorer)) {
+      transition: transform 300ms ease-in-out;
+    }
+
+    &.lock-scroll > :not(.sidebar.left:has(.tag-explorer)) {
+      transform: translateX(100dvw);
+      transition: transform 300ms ease-in-out;
+    }
+
+    .sidebar.left:has(.tag-explorer) {
+      box-sizing: border-box;
+      position: sticky;
+      background-color: var(--light);
+      padding: 1rem 0 1rem 0;
+      margin: 0;
+    }
+
+    .hide-until-loaded ~ .tag-explorer-content {
+      display: none;
+    }
+  }
+}
+
+.tag-explorer {
+  display: flex;
+  flex-direction: column;
+  overflow-y: hidden;
+  min-height: 1.2rem;
+  flex: 0 1 auto;
+
+  &.collapsed {
+    flex: 0 1 1.2rem;
+
+    & .fold {
+      transform: rotateZ(-90deg);
+    }
+  }
+
+  & .fold {
+    margin-left: 0.5rem;
+    transition: transform 0.3s ease;
+    opacity: 0.8;
+  }
+
+  @media all and ($mobile) {
+    order: -1;
+    height: initial;
+    overflow: hidden;
+    flex-shrink: 0;
+    align-self: flex-start;
+    margin-top: auto;
+    margin-bottom: auto;
+  }
+
+  button.mobile-explorer {
+    display: none;
+  }
+
+  button.desktop-explorer {
+    display: flex;
+  }
+
+  @media all and ($mobile) {
+    button.mobile-explorer {
+      display: flex;
+    }
+
+    button.desktop-explorer {
+      display: none;
+    }
+  }
+
+  svg {
+    pointer-events: all;
+  }
+}
+
+button.mobile-explorer,
+button.desktop-explorer {
+  background-color: transparent;
+  border: none;
+  text-align: left;
+  cursor: pointer;
+  padding: 0;
+  color: var(--dark);
+  display: flex;
+  align-items: center;
+
+  & h2 {
+    font-size: 1rem;
+    display: inline-block;
+    margin: 0;
+  }
+}
+
+.tag-explorer-content {
+  overflow: hidden;
+  overflow-y: auto;
+  margin-top: 0.5rem;
+
+  & ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+
+    &.tag-ul {
+      overscroll-behavior: contain;
+    }
+
+    & li > a {
+      color: var(--dark);
+      opacity: 0.75;
+      pointer-events: all;
+
+      &.active {
+        opacity: 1;
+        color: var(--tertiary);
+      }
+    }
+  }
+}
+
+.tag-item {
+  display: flex;
+  align-items: center;
+  user-select: none;
+
+  & > a {
+    color: var(--secondary);
+    font-family: var(--headerFont);
+    font-size: 0.95rem;
+    font-weight: $semiBoldWeight;
+    line-height: 1.5rem;
+    display: inline-block;
+    padding: 0.2rem 0.4rem;
+    border-radius: 8px;
+
+    &:hover {
+      color: var(--tertiary);
+      background-color: var(--highlight);
+    }
+
+    &.active {
+      color: var(--tertiary);
+    }
+  }
+
+  &.collapsed > a {
+    opacity: 0.5;
+  }
+}
+
+.tag-explorer {
+  @media all and ($mobile) {
+    &.collapsed {
+      flex: 0 0 34px;
+
+      & > .tag-explorer-content {
+        transform: translateX(-100vw);
+        visibility: hidden;
+      }
+    }
+
+    &:not(.collapsed) {
+      flex: 0 0 34px;
+
+      & > .tag-explorer-content {
+        transform: translateX(0);
+        visibility: visible;
+      }
+    }
+
+    .tag-explorer-content {
+      box-sizing: border-box;
+      z-index: 100;
+      position: absolute;
+      top: 0;
+      left: 0;
+      margin-top: 0;
+      background-color: var(--light);
+      max-width: 100vw;
+      width: 100vw;
+      transform: translateX(-100vw);
+      transition:
+        transform 200ms ease,
+        visibility 200ms ease;
+      overflow: hidden;
+      padding: 4rem 0 2rem 0;
+      height: 100dvh;
+      max-height: 100dvh;
+      visibility: hidden;
+    }
+
+    .mobile-explorer {
+      margin: 0;
+      padding: 5px;
+      z-index: 101;
+    }
+  }
+}
