@@ -78,7 +78,11 @@ export const FrontMatter: QuartzTransformerPlugin<Partial<Options>> = (userOpts)
             }
 
             const tags = coerceToArray(coalesceAliases(data, ["tags", "tag"]))
-            if (tags) data.tags = [...new Set(tags.map((tag: string) => slugTag(tag)))]
+            const filteredTags = ["wip", "note", "private", "draft", "todo", "notheme"]
+            if (tags) {
+              data.tags = [...new Set(tags.map((tag: string) => slugTag(tag)))]
+                .filter((tag: string) => !filteredTags.includes(tag.toLowerCase()))
+            }
 
             const aliases = coerceToArray(coalesceAliases(data, ["aliases", "alias"]))
             if (aliases) {

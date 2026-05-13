@@ -342,6 +342,12 @@ export const ObsidianFlavoredMarkdown: QuartzTransformerPlugin<Partial<Options>>
                   return false
                 }
 
+                // Filter out common non-meaningful tags
+                const lowerTag = tag.toLowerCase()
+                if (["wip", "note", "private", "draft", "todo"].includes(lowerTag)) {
+                  return false
+                }
+
                 tag = slugTag(tag)
                 if (file.data.frontmatter) {
                   const noteTags = file.data.frontmatter.tags ?? []
