@@ -612,16 +612,15 @@ async function renderTagTree(container: HTMLElement): Promise<() => void> {
 
   const g = svg.append("g")
 
-  svg.call(
-    zoom<SVGSVGElement, any>()
-      .extent([[0, 0], [width, height]])
-      .scaleExtent([0.1, 3])
-      .on("zoom", (event) => {
-        g.attr("transform", event.transform)
-      }),
-  )
+  const zoomBehavior = zoom<SVGSVGElement, any>()
+    .extent([[0, 0], [width, height]])
+    .scaleExtent([0.1, 3])
+    .on("zoom", (event) => {
+      g.attr("transform", event.transform)
+    })
 
-  svg.call(zoom.transform, zoomIdentity.translate(0, height / 2))
+  svg.call(zoomBehavior)
+  svg.call(zoomBehavior.transform, zoomIdentity.translate(0, height / 2))
 
   g.selectAll(".link")
     .data(d3Root.links())
