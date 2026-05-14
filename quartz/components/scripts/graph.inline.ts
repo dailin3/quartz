@@ -628,7 +628,11 @@ async function renderTagTree(container: HTMLElement): Promise<() => void> {
     .append("path")
     .attr("class", "link")
     .attr("d", (d: any) => {
-      return `M${d.source.x},${d.source.y}C${d.source.x},${(d.source.y + d.target.y) / 2},${d.target.x},${(d.source.y + d.target.y) / 2},${d.target.x},${d.target.y}`
+      const sx = d.source.x + width / 2
+      const sy = d.source.y + height / 2
+      const tx = d.target.x + width / 2
+      const ty = d.target.y + height / 2
+      return `M${sx},${sy}C${sx},${(sy + ty) / 2},${tx},${(sy + ty) / 2},${tx},${ty}`
     })
     .attr("fill", "none")
     .attr("stroke", "var(--lightgray)")
@@ -638,7 +642,7 @@ async function renderTagTree(container: HTMLElement): Promise<() => void> {
     .enter()
     .append("g")
     .attr("class", "node")
-    .attr("transform", (d: any) => `translate(${d.x},${d.y})`)
+    .attr("transform", (d: any) => `translate(${d.x + width / 2},${d.y + height / 2})`)
 
   node.append("circle")
     .attr("r", (d: any) => d.data.article ? 4 : 6)
