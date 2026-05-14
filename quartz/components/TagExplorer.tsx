@@ -95,7 +95,7 @@ export default ((userOpts?: Partial<Options>) => {
                 <polyline points="6 9 12 15 18 9"></polyline>
               </svg>
               <div>
-                <span class="tag-folder-title"></span>
+                <a class="tag-folder-title"></a>
               </div>
             </div>
             <div class="tag-folder-outer">

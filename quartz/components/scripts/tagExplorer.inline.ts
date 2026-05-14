@@ -19,9 +19,7 @@ function toggleTagFolder(evt: MouseEvent) {
 
   const isSvg = target.nodeName === "svg"
 
-  // folder-container -> div > button/span -> svg
   // svg.parentElement gives us the div (folder-container)
-  // we need folder-container div -> nextElementSibling (folder-outer)
   const folderContainer = isSvg
     ? target.parentElement
     : target.parentElement?.parentElement
@@ -76,14 +74,16 @@ function createTagFolderNode(
   const clone = template.content.cloneNode(true) as DocumentFragment
   const li = clone.querySelector("li") as HTMLLIElement
   const folderContainer = li.querySelector(".tag-folder-container") as HTMLElement
-  const titleSpan = folderContainer.querySelector(".tag-folder-title") as HTMLElement
+  const titleLink = folderContainer.querySelector(".tag-folder-title") as HTMLAnchorElement
   const folderOuter = li.querySelector(".tag-folder-outer") as HTMLElement
   const ul = folderOuter.querySelector("ul") as HTMLUListElement
 
   const fullPath = pathPrefix ? `${pathPrefix}/${node.name}` : node.name
   folderContainer.dataset.tagpath = fullPath
 
-  titleSpan.textContent = `${node.name} (${node.count})`
+  titleLink.href = resolveRelative(currentSlug, `tags/${fullPath}` as FullSlug)
+  titleLink.dataset.for = `tags/${fullPath}`
+  titleLink.textContent = `${node.name} (${node.count})`
 
   if (currentSlug === `tags/${fullPath}` || currentSlug === fullPath) {
     folderContainer.classList.add("active")
