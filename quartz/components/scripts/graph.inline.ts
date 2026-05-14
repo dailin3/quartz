@@ -556,6 +556,138 @@ async function renderGraph(graph: HTMLElement, fullSlug: FullSlug) {
   }
 }
 
+async function renderTagTree(container: HTMLElement): Promise<() => void> {
+  const { hierarchy, tree, zoomIdentity, select, zoom } = await import("d3")
+  const data: Record<string, ContentDetails> = await fetchData as Record<string, ContentDetails>
+
+  // Build tag tree from contentIndex
+  type TagNode = {
+    name: string
+    children: Record<string, TagNode>
+    articles: Array<{ slug: FullSlug; title: string }>
+  }
+
+  const root: TagNode = { name: "", children: {}, articles: [] }
+
+  for (const entry of Object.values(data)) {
+    for (const tag of entry.tags) {
+      const parts = tag.split("/")
+      let current = root
+      for (let i = 0; i < parts.length; i++) {
+        const part = parts[i]
+        if (!current.children[part]) {
+          current.children[part] = { name: part, children: {}, articles: [] }
+        }
+        current = current.children[part]
+        if (i === parts.length - 1) {
+          current.articles.push({ slug: entry.slug as FullSlug, title: entry.title })
+        }
+      }
+    }
+  }
+
+  // Convert to D3 hierarchy
+  function buildD3Hierarchy(node: TagNode, path: string): any {
+    const children: any[] = []
+    for (const [name, child] of Object.entries(node.children)) {
+      const childPath = path ? `${path}/${name}` : name
+      children.push(buildD3Hierarchy(child, childPath))
+    }
+    for (const article of node.articles) {
+      children.push({ name: article.title, slug: article.slug, article: true, children: [] })
+    }
+    return { name: node.name || "Tags", children }
+  }
+
+  const d3Root = hierarchy(buildD3Hierarchy(root, ""))
+  const treeLayout = tree<any>()
+  treeLayout(d3Root)
+
+  // Set up SVG
+  const width = container.offsetWidth
+  const height = Math.max(container.offsetHeight, 500)
+  select(container).selectAll("*").remove()
+
+  const svg = select(container)
+    .append("svg")
+    .attr("width", width)
+    .attr("height", height)
+
+  const g = svg.append("g")
+
+  // Set up zoom
+  svg.call(
+    zoom<SVGSVGElement, any>()
+      .extent([[0, 0], [width, height]])
+      .scaleExtent([0.1, 3])
+      .on("zoom", (event) => {
+        g.attr("transform", event.transform)
+      }),
+  )
+
+  // Center the tree
+  const nodes = d3Root.descendants()
+  const minX = Math.min(...nodes.map(n => n.x))
+  const maxX = Math.max(...nodes.map(n => n.x))
+  const initialTransform = zoomIdentity.translate(0, height / 2)
+  svg.call(zoom.transform, initialTransform)
+
+  // Draw links
+  g.selectAll(".link")
+    .data(d3Root.links())
+    .enter()
+    .append("path")
+    .attr("class", "link")
+    .attr("d", (d: any) => {
+      return `M${d.source.x},${d.source.y}C${d.source.x},${(d.source.y + d.target.y) / 2},${d.target.x},${(d.source.y + d.target.y) / 2},${d.target.x},${d.target.y}`
+    })
+    .attr("fill", "none")
+    .attr("stroke", "var(--lightgray)")
+
+  // Draw nodes
+  const node = g.selectAll(".node")
+    .data(nodes)
+    .enter()
+    .append("g")
+    .attr("class", "node")
+    .attr("transform", (d: any) => `translate(${d.x},${d.y})`)
+
+  node.append("circle")
+    .attr("r", (d: any) => d.data.article ? 4 : 6)
+    .attr("fill", (d: any) => d.data.article ? "var(--secondary)" : "var(--light)")
+    .attr("stroke", (d: any) => d.data.article ? "none" : "var(--tertiary)")
+    .attr("stroke-width", 2)
+    .style("cursor", "pointer")
+    .on("click", (event: MouseEvent, d: any) => {
+      if (d.data.article) {
+        const slug = d.data.slug as FullSlug
+        const fullSlug = window.location.pathname.replace(/\/$/, "") + "/" + slug
+        window.spaNavigate(new URL(fullSlug, window.location.toString()))
+        hideTagGraph()
+      }
+    })
+
+  node.append("text")
+    .attr("dy", ".35em")
+    .attr("x", (d: any) => d.data.article ? 10 : 10)
+    .text((d: any) => d.data.name)
+    .style("font-size", "12px")
+    .style("fill", "var(--dark)")
+    .style("cursor", "pointer")
+    .on("click", (event: MouseEvent, d: any) => {
+      if (d.data.article) {
+        const slug = d.data.slug as FullSlug
+        const fullSlug = window.location.pathname.replace(/\/$/, "") + "/" + slug
+        window.spaNavigate(new URL(fullSlug, window.location.toString()))
+        hideTagGraph()
+      }
+    })
+
+  return () => {
+    select(container).selectAll("*").remove()
+  }
+}
+
 let localGraphCleanups: (() => void)[] = []
 let globalGraphCleanups: (() => void)[] = []
 
@@ -613,16 +745,24 @@ document.addEventListener("nav", async (e: CustomEventMap["nav"]) => {
     }
   }
 
-  function hideGlobalGraph() {
-    cleanupGlobalGraphs()
-    for (const container of containers) {
-      container.classList.remove("active")
-      const sidebar = container.closest(".sidebar") as HTMLElement
-      if (sidebar) {
-        sidebar.style.zIndex = ""
-      }
+function hideTagGraph() {
+  cleanupTagGraphs()
+  for (const container of containers) {
+    container.classList.remove("tag-active")
+    const sidebar = container.closest(".sidebar") as HTMLElement
+    if (sidebar) {
+      sidebar.style.zIndex = ""
     }
   }
+}
+
+let tagGraphCleanups: (() => void)[] = []
+function cleanupTagGraphs() {
+  for (const cleanup of tagGraphCleanups) {
+    cleanup()
+  }
+  tagGraphCleanups = []
+}
 
   async function shortcutHandler(e: HTMLElementEventMap["keydown"]) {
     if (e.key === "g" && (e.ctrlKey || e.metaKey) && !e.shiftKey) {
@@ -632,6 +772,13 @@ document.addEventListener("nav", async (e: CustomEventMap["nav"]) => {
       )
       anyGlobalGraphOpen ? hideGlobalGraph() : renderGlobalGraph()
     }
+    if (e.key === "i" && (e.ctrlKey || e.metaKey) && !e.shiftKey) {
+      e.preventDefault()
+      const anyTagGraphOpen = containers.some((container) =>
+        container.classList.contains("tag-active"),
+      )
+      anyTagGraphOpen ? hideTagGraph() : renderTagGraph()
+    }
   }
 
   const containerIcons = document.getElementsByClassName("global-graph-icon")
@@ -639,6 +786,29 @@ document.addEventListener("nav", async (e: CustomEventMap["nav"]) => {
     icon.addEventListener("click", renderGlobalGraph)
     window.addCleanup(() => icon.removeEventListener("click", renderGlobalGraph))
   })
+
+  const tagContainerIcons = document.getElementsByClassName("tag-graph-icon")
+  Array.from(tagContainerIcons).forEach((icon) => {
+    icon.addEventListener("click", renderTagGraph)
+    window.addCleanup(() => icon.removeEventListener("click", renderTagGraph))
+  })
+
+  async function renderTagGraph() {
+    cleanupTagGraphs()
+    const containers = [...document.getElementsByClassName("global-graph-outer")] as HTMLElement[]
+    for (const container of containers) {
+      container.classList.add("tag-active")
+      const sidebar = container.closest(".sidebar") as HTMLElement
+      if (sidebar) {
+        sidebar.style.zIndex = "1"
+      }
+      const tagContainer = container.querySelector(".tag-tree-container") as HTMLElement
+      registerEscapeHandler(container, hideTagGraph)
+      if (tagContainer) {
+        tagGraphCleanups.push(await renderTagTree(tagContainer))
+      }
+    }
+  }
 
   document.addEventListener("keydown", shortcutHandler)
   window.addCleanup(() => {

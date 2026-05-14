@@ -15,7 +15,18 @@
     position: relative;
     overflow: hidden;
 
-    & > .global-graph-icon {
+    & > .graph-icon-row {
+      position: absolute;
+      top: 0;
+      right: 0;
+      display: flex;
+      gap: 2px;
+      padding: 0.3rem;
+      z-index: 1;
+    }
+
+    & > .global-graph-icon,
+    & > .graph-icon-row > .tag-graph-icon {
       cursor: pointer;
       background: none;
       border: none;
@@ -23,15 +34,10 @@
       opacity: 0.5;
       width: 24px;
       height: 24px;
-      position: absolute;
       padding: 0.2rem;
-      margin: 0.3rem;
-      top: 0;
-      right: 0;
       border-radius: 4px;
       background-color: transparent;
       transition: background-color 0.5s ease;
-      cursor: pointer;
       &:hover {
         background-color: var(--lightgray);
       }
@@ -49,11 +55,14 @@
     display: none;
     overflow: hidden;
 
-    &.active {
+    &.active,
+    &.tag-active {
       display: inline-block;
     }
 
-    & > .global-graph-container {
+    & > .global-graph-container,
+    & > .tag-tree-container {
+      display: none;
       border: 1px solid var(--lightgray);
       background-color: var(--light);
       border-radius: 5px;
@@ -64,9 +73,38 @@
       transform: translate(-50%, -50%);
       height: 80vh;
       width: 80vw;
+      overflow: hidden;
 
       @media all and not ($desktop) {
         width: 90%;
+      }
+    }
+
+    &.active > .global-graph-container {
+      display: block;
+    }
+
+    &.tag-active > .tag-tree-container {
+      display: block;
+    }
+
+    & > .tag-tree-container {
+      svg {
+        width: 100%;
+        height: 100%;
+      }
+
+      .link {
+        fill: none;
+        stroke: var(--lightgray);
+        stroke-width: 1.5;
+      }
+
+      .node {
+        cursor: pointer;
+        &:hover circle {
+          fill: var(--tertiary);
+        }
       }
     }
   }
