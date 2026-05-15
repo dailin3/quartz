@@ -25,8 +25,7 @@
       z-index: 1;
     }
 
-    & > .global-graph-icon,
-    & > .graph-icon-row > .tag-graph-icon {
+    & > .global-graph-icon {
       cursor: pointer;
       background: none;
       border: none;
@@ -88,24 +87,8 @@
       display: block;
     }
 
-    & > .tag-tree-container {
-      svg {
-        width: 100%;
-        height: 100%;
-      }
-
-      .link {
-        fill: none;
-        stroke: var(--lightgray);
-        stroke-width: 1.5;
-      }
-
-      .node {
-        cursor: pointer;
-        &:hover circle {
-          fill: var(--tertiary);
-        }
-      }
+    &.tag-active > .tag-tree-container {
+      display: block;
     }
   }
 }

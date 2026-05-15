@@ -84,21 +84,11 @@ export default ((opts?: Partial<GraphOptions>) => {
                 s-2-0.897-2-2s0.897-2,2-2S47,39.897,47,41z M49,10c-2.206,0-4-1.794-4-4s1.794-4,4-4s4,1.794,4,4S51.206,10,49,10z"/>
               </svg>
             </button>
-            <button class="tag-graph-icon" aria-label="Tag Tree">
-              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <circle cx="12" cy="5" r="3"/>
-                <line x1="12" y1="8" x2="12" y2="12"/>
-                <circle cx="6" cy="17" r="3"/>
-                <circle cx="18" cy="17" r="3"/>
-                <line x1="12" y1="12" x2="6" y2="14"/>
-                <line x1="12" y1="12" x2="18" y2="14"/>
-              </svg>
-            </button>
           </div>
         </div>
         <div class="global-graph-outer">
           <div class="global-graph-container" data-cfg={JSON.stringify(globalGraph)}></div>
-          <div class="tag-tree-container"></div>
+          <div class="tag-tree-container" data-cfg={JSON.stringify(globalGraph)}></div>
         </div>
       </div>
     )

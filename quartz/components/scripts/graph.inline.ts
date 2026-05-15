@@ -68,7 +68,11 @@ type TweenNode = {
   stop: () => void
 }
 
-async function renderGraph(graph: HTMLElement, fullSlug: FullSlug) {
+async function renderGraph(
+  graph: HTMLElement,
+  fullSlug: FullSlug,
+  preBuilt?: { nodes: NodeData[]; links: LinkData[] },
+) {
   const slug = simplifySlug(fullSlug)
   const visited = getVisited()
   removeAllChildren(graph)
@@ -87,78 +91,94 @@ async function renderGraph(graph: HTMLElement, fullSlug: FullSlug) {
     showTags,
     focusOnHover,
     enableRadial,
-  } = JSON.parse(graph.dataset["cfg"]!) as D3Config
+  } = (graph.dataset["cfg"] ? JSON.parse(graph.dataset["cfg"]) : {}) as D3Config
 
-  const data: Map<SimpleSlug, ContentDetails> = new Map(
-    Object.entries<ContentDetails>(await fetchData).map(([k, v]) => [
-      simplifySlug(k as FullSlug),
-      v,
-    ]),
-  )
-  const links: SimpleLinkData[] = []
-  const tags: SimpleSlug[] = []
-  const validLinks = new Set(data.keys())
+  enableDrag ??= true
+  enableZoom ??= true
+  depth ??= -1
+  scale ??= 0.9
+  repelForce ??= 0.5
+  centerForce ??= 0.2
+  linkDistance ??= 30
+  fontSize ??= 0.6
+  opacityScale ??= 1
+  removeTags ??= []
+  showTags ??= true
+  focusOnHover ??= true
+  enableRadial ??= true
 
   const tweens = new Map<string, TweenNode>()
-  for (const [source, details] of data.entries()) {
-    const outgoing = details.links ?? []
 
-    for (const dest of outgoing) {
-      if (validLinks.has(dest)) {
-        links.push({ source: source, target: dest })
-      }
-    }
+  let graphData: { nodes: NodeData[]; links: LinkData[] }
 
-    if (showTags) {
-      const localTags = details.tags
-        .filter((tag) => !removeTags.includes(tag))
-        .map((tag) => simplifySlug(("tags/" + tag) as FullSlug))
-
-      tags.push(...localTags.filter((tag) => !tags.includes(tag)))
-
-      for (const tag of localTags) {
-        links.push({ source: source, target: tag })
-      }
-    }
-  }
-
-  const neighbourhood = new Set<SimpleSlug>()
-  const wl: (SimpleSlug | "__SENTINEL")[] = [slug, "__SENTINEL"]
-  if (depth >= 0) {
-    while (depth >= 0 && wl.length > 0) {
-      // compute neighbours
-      const cur = wl.shift()!
-      if (cur === "__SENTINEL") {
-        depth--
-        wl.push("__SENTINEL")
-      } else {
-        neighbourhood.add(cur)
-        const outgoing = links.filter((l) => l.source === cur)
-        const incoming = links.filter((l) => l.target === cur)
-        wl.push(...outgoing.map((l) => l.target), ...incoming.map((l) => l.source))
-      }
-    }
+  if (preBuilt) {
+    graphData = preBuilt
   } else {
-    validLinks.forEach((id) => neighbourhood.add(id))
-    if (showTags) tags.forEach((tag) => neighbourhood.add(tag))
-  }
+    const data: Map<SimpleSlug, ContentDetails> = new Map(
+      Object.entries<ContentDetails>(await fetchData).map(([k, v]) => [
+        simplifySlug(k as FullSlug),
+        v,
+      ]),
+    )
+    const links: SimpleLinkData[] = []
+    const tags: SimpleSlug[] = []
+    const validLinks = new Set(data.keys())
 
-  const nodes = [...neighbourhood].map((url) => {
-    const text = url.startsWith("tags/") ? "#" + url.substring(5) : (data.get(url)?.title ?? url)
-    return {
-      id: url,
-      text,
-      tags: data.get(url)?.tags ?? [],
+    for (const [source, details] of data.entries()) {
+      const outgoing = details.links ?? []
+
+      for (const dest of outgoing) {
+        if (validLinks.has(dest)) {
+          links.push({ source: source, target: dest })
+        }
+      }
+
+      if (showTags) {
+        const localTags = details.tags
+          .filter((tag) => !removeTags.includes(tag))
+          .map((tag) => simplifySlug(("tags/" + tag) as FullSlug))
+
+        tags.push(...localTags.filter((tag) => !tags.includes(tag)))
+
+        for (const tag of localTags) {
+          links.push({ source: source, target: tag })
+        }
+      }
     }
-  })
-  const graphData: { nodes: NodeData[]; links: LinkData[] } = {
-    nodes,
-    links: links
-      .filter((l) => neighbourhood.has(l.source) && neighbourhood.has(l.target))
-      .map((l) => ({
-        source: nodes.find((n) => n.id === l.source)!,
-        target: nodes.find((n) => n.id === l.target)!,
-      })),
+
+    const neighbourhood = new Set<SimpleSlug>()
+    const wl: (SimpleSlug | "__SENTINEL")[] = [slug, "__SENTINEL"]
+    if (depth >= 0) {
+      while (depth >= 0 && wl.length > 0) {
+        const cur = wl.shift()!
+        if (cur === "__SENTINEL") {
+          depth--
+          wl.push("__SENTINEL")
+        } else {
+          neighbourhood.add(cur)
+          const outgoing = links.filter((l) => l.source === cur)
+          const incoming = links.filter((l) => l.target === cur)
+          wl.push(...outgoing.map((l) => l.target), ...incoming.map((l) => l.source))
+        }
+      }
+    } else {
+      validLinks.forEach((id) => neighbourhood.add(id))
+      if (showTags) tags.forEach((tag) => neighbourhood.add(tag))
+    }
+
+    const nodes = [...neighbourhood].map((url) => {
+      const text = url.startsWith("tags/") ? "#" + url.substring(5) : (data.get(url)?.title ?? url)
+      return { id: url, text, tags: data.get(url)?.tags ?? [] }
+    })
+    graphData = {
+      nodes,
+      links: links
+        .filter((l) => neighbourhood.has(l.source) && neighbourhood.has(l.target))
+        .map((l) => ({
+          source: nodes.find((n) => n.id === l.source)!,
+          target: nodes.find((n) => n.id === l.target)!,
+        })),
+    }
   }
 
   const width = graph.offsetWidth
@@ -556,124 +576,6 @@ async function renderGraph(graph: HTMLElement, fullSlug: FullSlug) {
   }
 }
 
-// Tag Tree rendering
-async function renderTagTree(container: HTMLElement): Promise<() => void> {
-  const d3 = await import("d3")
-  const { hierarchy, tree, zoomIdentity, select, zoom } = d3
-  const data: Record<string, ContentDetails> = await fetchData as Record<string, ContentDetails>
-
-  type TagNode = {
-    name: string
-    children: Record<string, TagNode>
-    articles: Array<{ slug: FullSlug; title: string }>
-  }
-
-  const root: TagNode = { name: "", children: {}, articles: [] }
-
-  for (const entry of Object.values(data)) {
-    for (const tag of entry.tags) {
-      const parts = tag.split("/")
-      let current = root
-      for (let i = 0; i < parts.length; i++) {
-        const part = parts[i]
-        if (!current.children[part]) {
-          current.children[part] = { name: part, children: {}, articles: [] }
-        }
-        current = current.children[part]
-        if (i === parts.length - 1) {
-          current.articles.push({ slug: entry.slug as FullSlug, title: entry.title })
-        }
-      }
-    }
-  }
-
-  function buildD3Hierarchy(node: TagNode, path: string): any {
-    const children: any[] = []
-    for (const [name, child] of Object.entries(node.children)) {
-      children.push(buildD3Hierarchy(child, path ? `${path}/${name}` : name))
-    }
-    for (const article of node.articles) {
-      children.push({ name: article.title, slug: article.slug, article: true, children: [] })
-    }
-    return { name: node.name || "Tags", children }
-  }
-
-  const d3Root = hierarchy(buildD3Hierarchy(root, ""))
-  tree<any>()(d3Root)
-
-  const width = container.offsetWidth
-  const height = Math.max(container.offsetHeight, 500)
-  select(container).selectAll("*").remove()
-
-  const svg = select(container)
-    .append("svg")
-    .attr("width", width)
-    .attr("height", height)
-
-  const g = svg.append("g")
-
-  const zoomBehavior = zoom<SVGSVGElement, any>()
-    .extent([[0, 0], [width, height]])
-    .scaleExtent([0.1, 3])
-    .on("zoom", (event) => {
-      g.attr("transform", event.transform)
-    })
-
-  svg.call(zoomBehavior)
-  svg.call(zoomBehavior.transform, zoomIdentity.translate(0, height / 2))
-
-  g.selectAll(".link")
-    .data(d3Root.links())
-    .enter()
-    .append("path")
-    .attr("class", "link")
-    .attr("d", (d: any) => {
-      const sx = d.source.x + width / 2
-      const sy = d.source.y + height / 2
-      const tx = d.target.x + width / 2
-      const ty = d.target.y + height / 2
-      return `M${sx},${sy}C${sx},${(sy + ty) / 2},${tx},${(sy + ty) / 2},${tx},${ty}`
-    })
-    .attr("fill", "none")
-    .attr("stroke", "var(--lightgray)")
-
-  const node = g.selectAll(".node")
-    .data(d3Root.descendants())
-    .enter()
-    .append("g")
-    .attr("class", "node")
-    .attr("transform", (d: any) => `translate(${d.x + width / 2},${d.y + height / 2})`)
-
-  node.append("circle")
-    .attr("r", (d: any) => d.data.article ? 4 : 6)
-    .attr("fill", (d: any) => d.data.article ? "var(--secondary)" : "var(--light)")
-    .attr("stroke", (d: any) => d.data.article ? "none" : "var(--tertiary)")
-    .attr("stroke-width", 2)
-    .style("cursor", "pointer")
-    .on("click", (event: MouseEvent, d: any) => {
-      if (d.data.article) {
-        window.spaNavigate(new URL(d.data.slug as FullSlug, window.location.toString()))
-      }
-    })
-
-  node.append("text")
-    .attr("dy", ".35em")
-    .attr("x", 10)
-    .text((d: any) => d.data.name)
-    .style("font-size", "12px")
-    .style("fill", "var(--dark)")
-    .style("cursor", "pointer")
-    .on("click", (event: MouseEvent, d: any) => {
-      if (d.data.article) {
-        window.spaNavigate(new URL(d.data.slug as FullSlug, window.location.toString()))
-      }
-    })
-
-  return () => {
-    select(container).selectAll("*").remove()
-  }
-}
-
 let localGraphCleanups: (() => void)[] = []
 let globalGraphCleanups: (() => void)[] = []
 let tagGraphCleanups: (() => void)[] = []
@@ -691,6 +593,65 @@ function cleanupGlobalGraphs() {
 function cleanupTagGraphs() {
   for (const cleanup of tagGraphCleanups) cleanup()
   tagGraphCleanups = []
+}
+
+// Tag Tree rendering - uses the same Pixi.js force simulation as renderGraph
+async function renderTagTree(container: HTMLElement, fullSlug: FullSlug): Promise<() => void> {
+  const data: Record<string, ContentDetails> = await fetchData as Record<string, ContentDetails>
+
+  type TagNode = {
+    name: string
+    children: Record<string, TagNode>
+    articles: Array<{ slug: FullSlug; title: string }>
+  }
+  const root: TagNode = { name: "", children: {}, articles: [] }
+
+  for (const entry of Object.values(data)) {
+    for (const tag of entry.tags) {
+      const parts = tag.split("/")
+      let current = root
+      for (const part of parts) {
+        if (!current.children[part]) {
+          current.children[part] = { name: part, children: {}, articles: [] }
+        }
+        current = current.children[part]
+      }
+      current.articles.push({ slug: entry.slug as FullSlug, title: entry.title })
+    }
+  }
+
+  const nodes: NodeData[] = []
+  const links: LinkData[] = []
+
+  function walk(node: TagNode, path: string, parent: NodeData | null) {
+    const tagNode: NodeData = {
+      id: (`tags/${path}`) as SimpleSlug,
+      text: "#" + node.name,
+      tags: [],
+    }
+    nodes.push(tagNode)
+    if (parent) links.push({ source: parent, target: tagNode })
+
+    for (const article of node.articles) {
+      const articleNode: NodeData = {
+        id: simplifySlug(article.slug),
+        text: article.title,
+        tags: [],
+      }
+      nodes.push(articleNode)
+      links.push({ source: tagNode, target: articleNode })
+    }
+
+    for (const [name, child] of Object.entries(node.children)) {
+      walk(child, `${path}/${name}`, tagNode)
+    }
+  }
+
+  for (const [name, child] of Object.entries(root.children)) {
+    walk(child, name, null)
+  }
+
+  return renderGraph(container, fullSlug, { nodes, links })
 }
 
 document.addEventListener("nav", async (e: CustomEventMap["nav"]) => {
@@ -735,7 +696,7 @@ document.addEventListener("nav", async (e: CustomEventMap["nav"]) => {
       if (sidebar) sidebar.style.zIndex = "1"
       const tagContainer = container.querySelector(".tag-tree-container") as HTMLElement
       registerEscapeHandler(container, hideTagGraph)
-      if (tagContainer) tagGraphCleanups.push(await renderTagTree(tagContainer))
+      if (tagContainer) tagGraphCleanups.push(await renderTagTree(tagContainer, slug))
     }
   }
 
@@ -774,12 +735,6 @@ document.addEventListener("nav", async (e: CustomEventMap["nav"]) => {
   Array.from(containerIcons).forEach((icon) => {
     icon.addEventListener("click", renderGlobalGraph)
     window.addCleanup(() => icon.removeEventListener("click", renderGlobalGraph))
-  })
-
-  const tagContainerIcons = document.getElementsByClassName("tag-graph-icon")
-  Array.from(tagContainerIcons).forEach((icon) => {
-    icon.addEventListener("click", renderTagGraph)
-    window.addCleanup(() => icon.removeEventListener("click", renderTagGraph))
   })
 
   document.addEventListener("keydown", shortcutHandler)
