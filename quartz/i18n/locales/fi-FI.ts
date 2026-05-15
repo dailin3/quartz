@@ -83,5 +83,10 @@ export default {
       showingFirst: ({ count }) => `Näytetään ensimmäiset ${count} tunnistetta.`,
       totalTags: ({ count }) => `Löytyi yhteensä ${count} tunnistetta.`,
     },
+    tagGraph: {
+      title: "Tag Graph",
+      totalTags: ({ count }) => `${count} total tags`,
+      allTags: "All Tags",
+    },
   },
 } as const satisfies Translation

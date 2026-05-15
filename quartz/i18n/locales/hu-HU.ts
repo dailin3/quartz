@@ -81,5 +81,10 @@ export default {
       showingFirst: ({ count }) => `Első ${count} címke megjelenítve.`,
       totalTags: ({ count }) => `Összesen ${count} címke található.`,
     },
+    tagGraph: {
+      title: "Tag Graph",
+      totalTags: ({ count }) => `${count} total tags`,
+      allTags: "All Tags",
+    },
   },
 } as const satisfies Translation

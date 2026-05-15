@@ -84,5 +84,10 @@ export default {
       showingFirst: ({ count }) => `מראה את ה-${count} תגיות הראשונות.`,
       totalTags: ({ count }) => `${count} תגיות נמצאו סך הכל.`,
     },
+    tagGraph: {
+      title: "Tag Graph",
+      totalTags: ({ count }) => `${count} total tags`,
+      allTags: "All Tags",
+    },
   },
 } as const satisfies Translation

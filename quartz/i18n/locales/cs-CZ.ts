@@ -83,5 +83,10 @@ export default {
       showingFirst: ({ count }) => `Zobrazují se první ${count} tagy.`,
       totalTags: ({ count }) => `Nalezeno celkem ${count} tagů.`,
     },
+    tagGraph: {
+      title: "Tag Graph",
+      totalTags: ({ count }) => `${count} total tags`,
+      allTags: "All Tags",
+    },
   },
 } as const satisfies Translation

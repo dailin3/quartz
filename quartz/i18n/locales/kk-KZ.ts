@@ -83,5 +83,10 @@ export default {
       showingFirst: ({ count }) => `Алғашқы ${count} тег көрсетілуде.`,
       totalTags: ({ count }) => `Барлығы ${count} тег табылды.`,
     },
+    tagGraph: {
+      title: "Tag Graph",
+      totalTags: ({ count }) => `${count} total tags`,
+      allTags: "All Tags",
+    },
   },
 } as const satisfies Translation

@@ -81,5 +81,10 @@ export default {
       showingFirst: ({ count }) => `แสดง ${count} แท็กแรก`,
       totalTags: ({ count }) => `มีทั้งหมด ${count} แท็ก`,
     },
+    tagGraph: {
+      title: "Tag Graph",
+      totalTags: ({ count }) => `${count} total tags`,
+      allTags: "All Tags",
+    },
   },
 } as const satisfies Translation

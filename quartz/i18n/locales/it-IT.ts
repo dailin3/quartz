@@ -85,5 +85,10 @@ export default {
       totalTags: ({ count }) =>
         count === 1 ? "Trovata 1 etichetta in totale." : `Trovate ${count} etichette totali.`,
     },
+    tagGraph: {
+      title: "Tag Graph",
+      totalTags: ({ count }) => `${count} total tags`,
+      allTags: "All Tags",
+    },
   },
 } as const satisfies Translation

@@ -83,5 +83,10 @@ export default {
       showingFirst: ({ count }) => `Showing first ${count} tags.`,
       totalTags: ({ count }) => `Found ${count} total tags.`,
     },
+    tagGraph: {
+      title: "Tag Graph",
+      totalTags: ({ count }) => `Found ${count} total tags.`,
+      allTags: "All Tags",
+    },
   },
 } as const satisfies Translation

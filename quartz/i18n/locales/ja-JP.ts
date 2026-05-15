@@ -81,5 +81,10 @@ export default {
       showingFirst: ({ count }) => `のうち最初の${count}件を表示しています`,
       totalTags: ({ count }) => `全${count}個のタグを表示中`,
     },
+    tagGraph: {
+      title: "Tag Graph",
+      totalTags: ({ count }) => `${count} total tags`,
+      allTags: "All Tags",
+    },
   },
 } as const satisfies Translation

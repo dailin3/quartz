@@ -83,5 +83,10 @@ export default {
       showingFirst: ({ count }) => `Mostrant les primeres ${count} etiquetes.`,
       totalTags: ({ count }) => `S'han trobat ${count} etiquetes en total.`,
     },
+    tagGraph: {
+      title: "Tag Graph",
+      totalTags: ({ count }) => `${count} total tags`,
+      allTags: "All Tags",
+    },
   },
 } as const satisfies Translation

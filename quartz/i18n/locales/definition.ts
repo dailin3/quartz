@@ -84,5 +84,10 @@ export interface Translation {
       showingFirst: (variables: { count: number }) => string
       totalTags: (variables: { count: number }) => string
     }
+    tagGraph: {
+      title: string
+      totalTags: (variables: { count: number }) => string
+      allTags: string
+    }
   }
 }

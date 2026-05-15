@@ -81,5 +81,10 @@ export default {
       showingFirst: ({ count }) => `显示前${count}个标签。`,
       totalTags: ({ count }) => `总共有${count}个标签。`,
     },
+    tagGraph: {
+      title: "标签图谱",
+      totalTags: ({ count }) => `总共有${count}个标签。`,
+      allTags: "所有标签",
+    },
   },
 } as const satisfies Translation

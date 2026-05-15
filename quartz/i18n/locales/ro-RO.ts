@@ -84,5 +84,10 @@ export default {
       showingFirst: ({ count }) => `Se afișează primele ${count} etichete.`,
       totalTags: ({ count }) => `Au fost găsite ${count} etichete în total.`,
     },
+    tagGraph: {
+      title: "Tag Graph",
+      totalTags: ({ count }) => `${count} total tags`,
+      allTags: "All Tags",
+    },
   },
 } as const satisfies Translation

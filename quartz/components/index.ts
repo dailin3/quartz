@@ -25,10 +25,13 @@ import Flex from "./Flex"
 import ConditionalRender from "./ConditionalRender"
 import TagExplorer from "./TagExplorer"
 
+import TagGraphContent from "./pages/TagGraphContent"
+
 export {
   ArticleTitle,
   Content,
   TagContent,
+  TagGraphContent,
   FolderContent,
   Darkmode,
   ReaderMode,

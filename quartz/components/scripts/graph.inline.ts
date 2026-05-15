@@ -662,6 +662,8 @@ document.addEventListener("nav", async (e: CustomEventMap["nav"]) => {
     cleanupLocalGraphs()
     const localGraphContainers = document.getElementsByClassName("graph-container")
     for (const container of localGraphContainers) {
+      // Skip tag-graph containers - they render their own graph
+      if (container.classList.contains("tag-graph-container")) continue
       localGraphCleanups.push(await renderGraph(container as HTMLElement, slug))
     }
   }
@@ -670,6 +672,21 @@ document.addEventListener("nav", async (e: CustomEventMap["nav"]) => {
   const handleThemeChange = () => { void renderLocalGraph() }
   document.addEventListener("themechange", handleThemeChange)
   window.addCleanup(() => document.removeEventListener("themechange", handleThemeChange))
+
+  // Auto-render tag graph if on the tag-graph page
+  const tagGraphContainers = [...document.getElementsByClassName("tag-graph-container")] as HTMLElement[]
+  if (tagGraphContainers.length > 0) {
+    async function renderAllTagGraphs() {
+      cleanupTagGraphs()
+      for (const container of tagGraphContainers) {
+        tagGraphCleanups.push(await renderTagTree(container, slug))
+      }
+    }
+    await renderAllTagGraphs()
+    const handleTagThemeChange = () => { void renderAllTagGraphs() }
+    document.addEventListener("themechange", handleTagThemeChange)
+    window.addCleanup(() => document.removeEventListener("themechange", handleTagThemeChange))
+  }
 
   const graphContainers = [...document.getElementsByClassName("global-graph-outer")] as HTMLElement[]
 

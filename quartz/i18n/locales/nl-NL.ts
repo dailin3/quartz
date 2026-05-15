@@ -85,5 +85,10 @@ export default {
         count === 1 ? "Eerste label tonen." : `Eerste ${count} labels tonen.`,
       totalTags: ({ count }) => `${count} labels gevonden.`,
     },
+    tagGraph: {
+      title: "Tag Graph",
+      totalTags: ({ count }) => `${count} total tags`,
+      allTags: "All Tags",
+    },
   },
 } as const satisfies Translation

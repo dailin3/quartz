@@ -103,5 +103,10 @@ export default {
             ? `Rasta iš viso ${count} žymos.`
             : `Rasta iš viso ${count} žymų.`,
     },
+    tagGraph: {
+      title: "Tag Graph",
+      totalTags: ({ count }) => `${count} total tags`,
+      allTags: "All Tags",
+    },
   },
 } as const satisfies Translation
