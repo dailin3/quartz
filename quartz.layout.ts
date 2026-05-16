@@ -39,6 +39,7 @@ export const defaultContentPageLayout: PageLayout = {
       ],
     }),
     Component.TagExplorer(),
+    Component.RecentNotes({ limit: 5, linkToMore: "tags", showTags: false }),
   ],
   right: [
     Component.Graph(),
@@ -63,6 +64,7 @@ export const defaultListPageLayout: PageLayout = {
       ],
     }),
     Component.TagExplorer(),
+    Component.RecentNotes({ limit: 5, linkToMore: "tags", showTags: false }),
   ],
   right: [],
 }

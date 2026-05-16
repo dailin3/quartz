@@ -69,7 +69,7 @@ export default ((opts?: Partial<TagGraphContentOptions>) => {
               const href = resolveRelative(slug!, tagSlug)
               return (
                 <a class="internal tag-link" href={href}>
-                  <span class="tag-name">#{tag}</span>
+                  <span class="tag-name">{tag}</span>
                   <span class="tag-count-badge">{articles.length}</span>
                 </a>
               )

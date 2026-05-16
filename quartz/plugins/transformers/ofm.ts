@@ -21,6 +21,9 @@ import calloutScript from "../../components/scripts/callout.inline"
 import checkboxScript from "../../components/scripts/checkbox.inline"
 // @ts-ignore
 import mermaidScript from "../../components/scripts/mermaid.inline"
+// @ts-ignore
+import embedRecentNotesScript from "../../components/scripts/embedRecentNotes.inline"
+import embedRecentNotesStyle from "../../components/styles/recentNotes.inline.scss"
 import mermaidStyle from "../../components/styles/mermaid.inline.scss"
 import { FilePath, pathToRoot, slugTag, slugifyFilePath } from "../../util/path"
 import { toHast } from "mdast-util-to-hast"
@@ -784,6 +787,19 @@ export const ObsidianFlavoredMarkdown: QuartzTransformerPlugin<Partial<Options>>
           inline: true,
         })
       }
+
+      // Always enable embed RecentNotes script
+      js.push({
+        script: embedRecentNotesScript,
+        loadTime: "afterDOMReady",
+        contentType: "inline",
+      })
+
+      // Embed RecentNotes style
+      css.push({
+        content: embedRecentNotesStyle,
+        inline: true,
+      })
 
       return { js, css }
     },
