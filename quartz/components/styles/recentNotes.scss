@@ -1,3 +1,11 @@
+@use "../../styles/variables.scss" as *;
+
+@media all and ($mobile) {
+  .recent-notes {
+    display: none;
+  }
+}
+
 .recent-notes,
 .embed-recent-notes {
   & > h3 {

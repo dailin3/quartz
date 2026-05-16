@@ -347,7 +347,7 @@ export const ObsidianFlavoredMarkdown: QuartzTransformerPlugin<Partial<Options>>
 
                 // Filter out common non-meaningful tags
                 const lowerTag = tag.toLowerCase()
-                if (["wip", "note", "private", "draft", "todo"].includes(lowerTag)) {
+                if (["wip", "note", "private", "draft", "todo", "notheme", "task"].includes(lowerTag)) {
                   return false
                 }
 
