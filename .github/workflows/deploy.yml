@@ -7,9 +7,14 @@ on:
 
 jobs:
   deploy:
-    runs-on: self-hosted
+    runs-on: ubuntu-latest
     steps:
-      - name: Pull content and rebuild
+      - uses: webfactory/ssh-agent@v0.9.1
+        with:
+          ssh-private-key: ${{ secrets.ALIYUN_SSH_KEY }}
+
+      - name: Deploy
         run: |
-          cd ~/Obsidian && git pull
-          cd ~/quartz && git pull && npx quartz build
+          ssh -o StrictHostKeyChecking=accept-new \
+            ${{ secrets.ALIYUN_USER }}@${{ secrets.ALIYUN_HOST }} \
+            'cd ~/Obsidian && git pull && cd ~/quartz && git pull && npx quartz build'
