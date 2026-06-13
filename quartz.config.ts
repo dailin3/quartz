@@ -73,7 +73,7 @@ const config: QuartzConfig = {
       Plugin.Description(),
       Plugin.Latex({ renderEngine: "katex" }),
     ],
-    filters: [Plugin.ExplicitPublish()],
+    filters: [Plugin.ExplicitPublish(), Plugin.RemovePrivate()],
     emitters: [
       Plugin.AliasRedirects(),
       Plugin.ComponentResources(),
