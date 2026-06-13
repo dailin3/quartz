@@ -12,6 +12,6 @@ jobs:
       - name: Trigger deploy webhook
         run: |
           curl -s -X POST \
-            "${{ secrets.WEBHOOK_URL }}?key=${{ secrets.WEBHOOK_SECRET }}" \
+            "${{ secrets.WEBHOOK_URL }}?key=${{ secrets.WEBHOOK_SECRET }}&type=quartz-update" \
             --max-time 180 \
             -w "\nHTTP %{http_code}\n"
