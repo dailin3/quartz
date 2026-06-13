@@ -16,11 +16,11 @@ jobs:
       - name: Add aliyun host key
         run: |
           mkdir -p ~/.ssh
-          echo "8.152.206.143 ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAINIEz9ROGtgQL82zmuRxRDIptHSb/T0zcueBYXOp/31h" >> ~/.ssh/known_hosts
+          echo "${{ secrets.ALIYUN_HOST_KEY }}" >> ~/.ssh/known_hosts
 
       - name: Deploy
         run: |
-          ssh dailin@8.152.206.143 '
+          ssh ${{ secrets.ALIYUN_USER }}@${{ secrets.ALIYUN_HOST }} '
             cd ~/Obsidian && git pull
             cd ~/quartz && git pull && npx quartz build
           '
