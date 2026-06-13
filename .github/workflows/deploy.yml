@@ -9,12 +9,9 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     steps:
-      - uses: webfactory/ssh-agent@v0.9.1
-        with:
-          ssh-private-key: ${{ secrets.ALIYUN_SSH_KEY }}
-
-      - name: Deploy
+      - name: Trigger deploy webhook
         run: |
-          ssh -o StrictHostKeyChecking=accept-new \
-            ${{ secrets.ALIYUN_USER }}@${{ secrets.ALIYUN_HOST }} \
-            'cd ~/Obsidian && git pull && cd ~/quartz && git pull && npx quartz build'
+          curl -s -X POST \
+            "${{ secrets.WEBHOOK_URL }}?key=${{ secrets.WEBHOOK_SECRET }}" \
+            --max-time 180 \
+            -w "\nHTTP %{http_code}\n"
