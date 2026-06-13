@@ -1,0 +1,24 @@
+name: Deploy to Aliyun
+
+on:
+  push:
+    branches: [v4]
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: webfactory/ssh-agent@v0.9.1
+        with:
+          ssh-private-key: ${{ secrets.ALIYUN_SSH_KEY }}
+
+      - name: Add aliyun host key
+        run: ssh-keyscan -H 8.152.206.143 >> ~/.ssh/known_hosts
+
+      - name: Deploy
+        run: |
+          ssh dailin@8.152.206.143 '
+            cd ~/Obsidian && git pull
+            cd ~/quartz && git pull && npx quartz build
+          '
