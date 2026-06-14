@@ -9,6 +9,7 @@ export const sharedPageComponents: SharedLayout = {
   footer: Component.Footer({
     links: {
       Telegram: "https://t.me/+cKtfBqI0INdmMzg1",
+      RSS: "https://blog.dailin.tech/index.xml",
       QQ: "https://qm.qq.com/q/QlYmkHbf6S",
     },
   }),
