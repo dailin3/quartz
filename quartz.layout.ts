@@ -5,7 +5,21 @@ import * as Component from "./quartz/components"
 export const sharedPageComponents: SharedLayout = {
   head: Component.Head(),
   header: [],
-  afterBody: [],
+  afterBody: [
+    Component.Comments({
+      provider: "giscus",
+      options: {
+        repo: "dailin3/quartz",
+        repoId: "R_kgDOScBS6A",
+        category: "Announcements",
+        categoryId: "DIC_kwDOScBS6M4C_H5d",
+        mapping: "pathname",
+        reactionsEnabled: true,
+        inputPosition: "bottom",
+        lang: "zh-CN",
+      },
+    }),
+  ],
   footer: Component.Footer({
     links: {
       Telegram: "https://t.me/+cKtfBqI0INdmMzg1",
