@@ -13,6 +13,7 @@ export const sharedPageComponents: SharedLayout = {
         repoId: "R_kgDOScBS6A",
         category: "Announcements",
         categoryId: "DIC_kwDOScBS6M4C_H5d",
+        themeUrl: "https://giscus.app/themes",
         mapping: "pathname",
         reactionsEnabled: true,
         inputPosition: "bottom",
