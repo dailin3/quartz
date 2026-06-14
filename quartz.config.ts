@@ -16,7 +16,7 @@ const config: QuartzConfig = {
       provider: "plausible",
     },
     locale: "en-US",
-    baseUrl: "localhost:8080",
+    baseUrl: "blog.dailin.tech",
     ignorePatterns: ["private", "templates", ".obsidian", "abandon", "Clippings", "99 queue", "99 template", "99 attachment", "blogs"],
     defaultDateType: "modified",
     theme: {
