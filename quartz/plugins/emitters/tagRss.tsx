@@ -128,6 +128,15 @@ export const TagRss: QuartzEmitterPlugin<Partial<Options>> = (opts) => {
           ext: ".xml",
         })
       }
+
+      // Generate all-articles RSS (no limit)
+      const allItems = Array.from(linkIndex)
+      yield write({
+        ctx,
+        content: generateRSSFeed(cfg, allItems, "all", allItems.length),
+        slug: joinSegments("all", "index") as FullSlug,
+        ext: ".xml",
+      })
     },
   }
 }
