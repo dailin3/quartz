@@ -1,4 +1,3 @@
-export { CleanTags } from "./cleanTags"
 export { FrontMatter } from "./frontmatter"
 export { GitHubFlavoredMarkdown } from "./gfm"
 export { Citations } from "./citations"

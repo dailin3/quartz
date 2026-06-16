@@ -2,12 +2,8 @@ import { FullSlug, resolveRelative } from "../util/path"
 import { QuartzComponent, QuartzComponentConstructor, QuartzComponentProps } from "./types"
 import { classNames } from "../util/lang"
 
-// Management-only tags: used for vault organization, not for blog display
-const MANAGEMENT_TAGS = new Set(["#task", "#report", "#wip", "#notheme", "#private"])
-
 const TagList: QuartzComponent = ({ fileData, displayClass }: QuartzComponentProps) => {
-  const allTags = fileData.frontmatter?.tags
-  const tags = allTags?.filter((t: string) => !MANAGEMENT_TAGS.has(t))
+  const tags = fileData.frontmatter?.tags
   if (tags && tags.length > 0) {
     return (
       <ul class={classNames(displayClass, "tags")}>
