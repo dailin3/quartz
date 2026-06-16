@@ -11,7 +11,15 @@ jobs:
     steps:
       - name: Trigger deploy webhook
         run: |
-          curl -s -X POST \
-            "${{ secrets.WEBHOOK_URL }}?key=${{ secrets.WEBHOOK_SECRET }}&type=quartz-update" \
-            --max-time 180 \
-            -w "\nHTTP %{http_code}\n"
+          URL="${{ secrets.WEBHOOK_URL }}?key=${{ secrets.WEBHOOK_SECRET }}&type=quartz-update"
+          HTTP=""
+          for i in 1 2 3; do
+            HTTP=$(curl -sS -X POST "$URL" --max-time 60 -o /dev/null -w "%{http_code}" || echo "000")
+            echo "attempt $i: HTTP $HTTP"
+            if [ "$HTTP" = "200" ]; then
+              exit 0
+            fi
+            sleep 10
+          done
+          echo "::error::Webhook failed after 3 retries, last HTTP $HTTP"
+          exit 1
