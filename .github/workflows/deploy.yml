@@ -16,10 +16,23 @@ jobs:
           for i in 1 2 3; do
             HTTP=$(curl -sS -X POST "$URL" --max-time 60 -o /dev/null -w "%{http_code}" || echo "000")
             echo "attempt $i: HTTP $HTTP"
-            if [ "$HTTP" = "200" ]; then
+            # 202 = accepted, build is running asynchronously → success
+            if [ "$HTTP" = "200" ] || [ "$HTTP" = "202" ]; then
+              echo "webhook accepted (HTTP $HTTP), build will run in background"
               exit 0
             fi
-            sleep 10
+            # 403/400 = misconfigured auth or params, retrying won't help
+            if [ "$HTTP" = "403" ] || [ "$HTTP" = "400" ]; then
+              echo "::error::Webhook rejected request: HTTP $HTTP (auth/param issue, not retryable)"
+              exit 1
+            fi
+            # 503 = build lock held, wait longer for previous build to finish
+            # anything else = transient, retry with backoff
+            if [ "$HTTP" = "503" ]; then
+              sleep 30
+            else
+              sleep 15
+            fi
           done
           echo "::error::Webhook failed after 3 retries, last HTTP $HTTP"
           exit 1
